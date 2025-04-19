@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Epic Mysterious Forest Adventure</title>
+  <style>
+    /* Fullscreen creative background */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Helvetica, sans-serif;
+      background-image: url("images/forest.png");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      overflow: hidden;
+      position: relative;
+    }
+    /* Story container */
+    #story-container {
+      background: rgba(0, 0, 0, 0.65);
+      padding: 20px 30px;
+      border-radius: 8px;
+      max-width: 800px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      position: relative;
+      z-index: 10;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+    p {
+      font-size: 20px;
+      line-height: 1.6;
+    }
+    .choice-btn {
+      display: inline-block;
+      margin: 15px 10px 0 10px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .choice-btn:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+    /* Blood drip overlay */
+    #blood-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9;
+      overflow: hidden;
+    }
+    .drip {
+      position: absolute;
+      width: 8px;
+      height: 20px;
+      background: crimson;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: dripAnimation 2s ease-out forwards;
+    }
+    @keyframes dripAnimation {
+      0% {
+        transform: translateY(-50px);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+    }
+    /* Confetti container */
+    #confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 11;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      opacity: 0.9;
+      transform: rotate(45deg);
+      animation: confettiAnimation 3s ease-out forwards;
+    }
+    @keyframes confettiAnimation {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    /* Death Text Effect */
+    #death-text {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -150px);
+      font-size: 80px;
+      color: red;
+      font-weight: bold;
+      opacity: 0;
+      z-index: 12;
+    }
+    @keyframes dripDown {
+      0% {
+        transform: translate(-50%, -150px);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, 100vh);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Music -->
+  <audio id="bgMusic" src="https://www.bensound.com/bensound-music/bensound-epic.mp3" loop autoplay></audio>
+  <!-- Death Sound -->
+  <audio id="deathSound" src="https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3" preload="auto"></audio>
+  <!-- Victory Sound (for buttons) -->
+  <audio id="victorySound" src="https://www.soundjay.com/button/sounds/button-3.mp3" preload="auto"></audio>
+  <!-- Victory Music -->
+  <audio id="victoryMusic" src="https://www.bensound.com/bensound-music/bensound-happyrock.mp3" preload="auto"></audio>
+
+  <!-- Overlays -->
+  <div id="blood-overlay"></div>
+  <div id="confetti-container"></div>
+  <!-- Death Text (hidden by default) -->
+  <div id="death-text">YOU HAVE DIED</div>
+
+  <div id="story-container">
+    <h1>Epic Mysterious Forest Adventure</h1>
+    <p id="story-text">
+      You awaken in a mysterious forest with no recollection of how you arrived. Two diverging paths lie ahead.
+    </p>
+    <div id="choices">
+      <button class="choice-btn" onclick="choosePath('leftPath')">Take the left path</button>
+      <button class="choice-btn" onclick="choosePath('rightPath')">Take the right path</button>
+    </div>
+  </div>
+
+  <script>
+    // =======================
+    // Utility: Blood Drip Effect
+    // =======================
+    function triggerBloodDripEffect() {
+      const bloodOverlay = document.getElementById("blood-overlay");
+      bloodOverlay.innerHTML = ""; // Clear previous drips
+      const numDrips = Math.floor(Math.random() * 11) + 20;
+      for (let i = 0; i < numDrips; i++) {
+        const drip = document.createElement("div");
+        drip.classList.add("drip");
+        drip.style.left = Math.random() * 100 + "%";
+        drip.style.animationDelay = Math.random() + "s";
+        bloodOverlay.appendChild(drip);
+      }
+      // Clear drips after animation
+      setTimeout(() => { bloodOverlay.innerHTML = ""; }, 2500);
+    }
+
+    // =======================
+    // Utility: Confetti Effect
+    // =======================
+    function triggerConfettiEffect() {
+      const confettiContainer = document.getElementById("confetti-container");
+      confettiContainer.innerHTML = "";
+      const numConfetti = 100;
+      for (let i = 0; i < numConfetti; i++) {
+        const confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+        confetti.style.left = Math.random() * 100 + "%";
+        confetti.style.top = "-10px";
+        const colors = ["#FF0A0A", "#FFD700", "#FF69B4", "#ADFF2F", "#00BFFF"];
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 2 + "s";
+        confettiContainer.appendChild(confetti);
+      }
+      setTimeout(() => { confettiContainer.innerHTML = ""; }, 6000);
+    }
+
+    // =======================
+    // Utility: Death Text Drip Effect
+    // =======================
+    function triggerDeathTextEffect() {
+      const deathText = document.getElementById("death-text");
+      // Reset animation by removing and re-adding the element
+      deathText.style.animation = "none";
+      deathText.style.opacity = 1;
+      deathText.style.display = "block";
+      // Force reflow to reset animation
+      void deathText.offsetWidth;
+      deathText.style.animation = "dripDown 3s forwards";
+      // Hide the element after animation ends (3s)
+      setTimeout(() => { deathText.style.display = "none"; }, 3000);
+    }
+
+    // =======================
+    // Music Control Functions
+    // =======================
+    const bgMusic = document.getElementById("bgMusic");
+    const deathSound = document.getElementById("deathSound");
+    const victorySound = document.getElementById("victorySound");
+    const victoryMusic = document.getElementById("victoryMusic");
+    function stopBackgroundMusic() {
+      bgMusic.pause();
+    }
+    function resumeBackgroundMusic() {
+      victoryMusic.pause();
+      victoryMusic.currentTime = 0;
+      bgMusic.currentTime = 0;
+      bgMusic.play();
+    }
+    // =======================
+    // Outcome Effect Functions
+    // =======================
+    function playDeathEffect() {
+      stopBackgroundMusic();
+      deathSound.play();
+      triggerBloodDripEffect();
+      triggerDeathTextEffect();
+    }
+    function playVictoryEffect() {
+      stopBackgroundMusic();
+      victorySound.play();
+      victoryMusic.play();
+      triggerConfettiEffect();
+    }
+    // =======================
+    // Extended Story Nodes
+    // =======================
+    const storyNodes = {
+      start: {
+        text: "You awaken in a mysterious forest with no recollection of how you arrived. Two diverging paths lie ahead.",
+        choices: [
+          { text: "Take the left path", next: "leftPath" },
+          { text: "Take the right path", next: "rightPath" }
+        ]
+      },
+      leftPath: {
+        text: "Following a winding dirt trail to the left, you come upon a weathered cabin. An old man inside offers you two mysterious potions and a tale of hidden wonders.",
+        choices: [
+          { text: "Drink the red potion", next: "redPotion" },
+          { text: "Drink the blue potion", next: "bluePotion" },
+          { text: "Ask about his past", next: "oldManStory" },
+          { text: "Leave the cabin", next: "start" }
+        ]
+      },
+      redPotion: {
+        text: "You drink the red potion. A searing pain courses through you as the poison takes hold. Darkness envelops your senses. <br><br><strong>You have died.</strong>",
+        status: "dead",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      bluePotion: {
+        text: "The blue potion fills you with a comforting warmth. The old man smiles and reveals a hidden path behind the cabin.",
+        choices: [
+          { text: "Follow the hidden path", next: "hiddenPath" },
+          { text: "Thank him and return", next: "start" }
+        ]
+      },
+      oldManStory: {
+        text: "The old man shares his tale of a mystic lake deep in the forest—a place where enchanted waters can grant enlightenment or doom the unwary.",
+        choices: [
+          { text: "Seek the mystic lake", next: "mysticLake" },
+          { text: "Return to the cabin choices", next: "leftPath" }
+        ]
+      },
+      mysticLake: {
+        text: "At last, you reach a mist-shrouded lake with luminous waters. A spectral figure beckons you to swim, while a small boat floats by the shore.",
+        choices: [
+          { text: "Swim toward the figure", next: "lakeDeath" },
+          { text: "Board the boat", next: "boatGlide" },
+          { text: "Return to the cabin", next: "leftPath" }
+        ]
+      },
+      boatGlide: {
+        text: "You board the boat and glide over the shimmering lake. It carries you to a hidden sanctuary in a sunlit clearing where your arrival is celebrated.",
+        status: "victory",
+        choices: [
+          { text: "Savor your triumph", next: "sunriseEnding" },
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      lakeDeath: {
+        text: "You plunge into the lake, but the enchanted waters drag you beneath the surface. You struggle in vain as you are consumed by the depths. <br><br><strong>You have died.</strong>",
+        status: "dead",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      hiddenPath: {
+        text: "You tread the secret path and arrive at an ancient clearing dotted with mossy ruins. A mystical flower glows at the center, guarded by twisted vines.",
+        choices: [
+          { text: "Reach for the flower", next: "flowerBravery" },
+          { text: "Turn back", next: "leftPath" }
+        ]
+      },
+      flowerBravery: {
+        text: "Bravely, you grasp the flower despite the piercing thorns. As pain surges through you, a shimmering portal opens, revealing a breathtaking sunlit meadow.",
+        status: "victory",
+        choices: [
+          { text: "Step through the portal", next: "sunriseEnding" },
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      sunriseEnding: {
+        text: "You emerge into a meadow drenched in golden dawn. The hardships have made you stronger, and new adventures await beyond the horizon.",
+        status: "victory",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      rightPath: {
+        text: "You choose the right path, where the gentle murmur of flowing water guides you to a wide river spanned by an ancient stone bridge.",
+        choices: [
+          { text: "Cross the stone bridge", next: "bridgeCrossing" },
+          { text: "Attempt to swim across", next: "swimAcross" },
+          { text: "Follow the riverbank", next: "riverBank" }
+        ]
+      },
+      bridgeCrossing: {
+        text: "Cautiously, you step onto the bridge. Midway, the timeworn stones crumble beneath you and you plunge into the roaring river. <br><br><strong>You have died.</strong>",
+        status: "dead",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      swimAcross: {
+        text: "Determined, you dive into the river. Its powerful current drags you under and you cannot escape its icy grasp. <br><br><strong>You have died.</strong>",
+        status: "dead",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      riverBank: {
+        text: "Following the riverbank, you find a small boat hidden among the reeds. It carries you to a secret garden full of ancient statues and vibrant flora.",
+        choices: [
+          { text: "Explore the garden", next: "gardenSanctuary" },
+          { text: "Return to the forest entrance", next: "start" }
+        ]
+      },
+      gardenSanctuary: {
+        text: "Within the tranquil garden, you sense a deeper mystery. A hidden path leads to an enchanted grove where a mysterious guardian awaits.",
+        choices: [
+          { text: "Venture into the enchanted grove", next: "enchantedGrove" },
+          { text: "Rest among the statues", next: "gardenRest" }
+        ]
+      },
+      gardenRest: {
+        text: "As you rest, marauding creatures ambush you in the garden’s shadows. Overpowered, you meet a grim end. <br><br><strong>You have died.</strong>",
+        status: "dead",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      enchantedGrove: {
+        text: "In the grove, a luminous guardian presents you with a final trial: to face a fearsome forest monster in a battle of wits and strength.",
+        choices: [
+          { text: "Accept the trial", next: "finalBattle" },
+          { text: "Decline and retreat", next: "gardenSanctuary" }
+        ]
+      },
+      finalBattle: {
+        text: "You confront the monstrous guardian. After a fierce struggle and clever tactics, you prevail over the beast!",
+        status: "victory",
+        choices: [
+          { text: "Embrace your triumph", next: "victoryEnding" },
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      victoryEnding: {
+        text: "A sense of accomplishment floods you as the forest sings its approval. You have overcome immense challenges and claimed your rightful glory.",
+        status: "victory",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      caveEntrance: {
+        text: "Off the beaten track, you notice a dark opening beneath tangled roots—a cave whose whispers beckon you closer.",
+        choices: [
+          { text: "Enter the cave", next: "caveOfWhispers" },
+          { text: "Ignore it and return", next: "start" }
+        ]
+      },
+      caveOfWhispers: {
+        text: "Inside the cave, ghostly voices echo ancient secrets. You can feel your sanity tested by relentless whispers.",
+        choices: [
+          { text: "Venture deeper", next: "madness" },
+          { text: "Escape quickly", next: "escapeCave" }
+        ]
+      },
+      madness: {
+        text: "The voices overwhelm your mind and you are lost to madness. <br><br><strong>You have died.</strong>",
+        status: "dead",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      },
+      escapeCave: {
+        text: "You flee the cave, heart pounding, forever changed by its haunting secrets. Though shaken, you live to tell the tale.",
+        choices: [
+          { text: "Restart your journey", next: "start" }
+        ]
+      }
+    };
+
+    // =======================
+    // Story Navigation Functions
+    // =======================
+    function updateStory(nodeKey) {
+      const node = storyNodes[nodeKey];
+      document.getElementById("story-text").innerHTML = node.text;
+      const choicesDiv = document.getElementById("choices");
+      choicesDiv.innerHTML = "";
+      node.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.innerText = choice.text;
+        btn.onclick = () => choosePath(choice.next);
+        choicesDiv.appendChild(btn);
+      });
+      // Outcome effects if applicable
+      if (node.status === "dead") {
+        playDeathEffect();
+      } else if (node.status === "victory") {
+        playVictoryEffect();
+      } 
+      // Resume background music at start
+      if (nodeKey === "start") {
+        resumeBackgroundMusic();
+      }
+    }
+    function choosePath(nextNode) {
+      updateStory(nextNode);
+    }
+    // Initialize the story
+    updateStory("start");
+  </script>
+</body>
+</html>

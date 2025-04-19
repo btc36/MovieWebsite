@@ -1,0 +1,114 @@
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 20px;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    color: #333;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    background-color: #003366;
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.header .title {
+    font-size: 2rem;
+}
+
+/* Layout */
+.main {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: space-between;
+}
+
+/* About Me Section */
+.about-me {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex: 1 1 40%;
+}
+
+.image {
+    display: flex;
+    justify-content: center;  /* centers horizontally */
+    align-items: center;
+    padding-top: 10px;
+}
+
+.about-me img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+
+.about-me h2, .about-me h3 {
+    margin-top: 20px;
+    color: #003366;
+}
+
+/* Resume Section */
+.resume {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex: 1 1 55%;
+}
+
+.resume h1, .resume h2, .resume h3 {
+    color: #003366;
+    margin-top: 20px;
+}
+
+.resume ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.resume ul ul {
+    list-style-type: circle;
+    margin-left: 20px;
+    margin-top: 5px;
+}
+
+.job-description {
+    border: solid 1px #ccc;
+    padding: 10px;
+    font-size: 20px;
+    font-style: italic;
+}
+
+/* Paragraphs in list */
+.resume p {
+    margin: 10px 0;
+    font-size: 0.95rem;
+}
+
+/* Extras */
+li {
+    margin: 5px 0;
+}
+
+@media (max-width: 768px) {
+    .main {
+        flex-direction: column;
+    }
+}
